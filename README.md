@@ -18,6 +18,8 @@ Tests use small synthetic fixtures in `tests/fixtures/data/`, in-memory cases an
 
 `emporio_support_agent.tools` exposes five provider-independent tools through `get_tool_definitions()` and `execute_tool(context, name, arguments)`. Explicit schemas and local validation reject unexpected arguments; order identity comes only from application-owned `ToolContext`. Outputs use JSON-native values, decimal money strings and ISO dates. Product discovery matches all normalized query terms across source fields, prioritizes name/category/description/specs, and preserves source order for ties. Budgets use current unit prices from the pricing module. LLM/provider integration remains pending.
 
+The OpenAI Responses API is intended for the future agent integration. The pinned Python SDK `openai==3.42.0` was installed and checked locally on Python 3.12.13. Live account access, candidate models and Responses/function-calling compatibility remain unverified because `OPENAI_API_KEY` was unavailable during verification. Supply API keys through the local process environment and never commit them; `.env` files are not loaded automatically. Provider checks remain separate from the offline pytest suite.
+
 ## Local setup
 
 Requires Python 3.12 or newer. The development environment uses Python 3.12.13.
