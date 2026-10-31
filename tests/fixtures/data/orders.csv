@@ -1,0 +1,3 @@
+order_id,customer_id,order_date,status,total_brl,payment_method,tracking_code,estimated_delivery,notes
+401,301,2025-02-01,shipped,1250.000,pix,DEMO-TRACK-ONE,2025-02-11,Demo order note
+402,302,2025-02-02,pending,123.45670,credit_3x,,,

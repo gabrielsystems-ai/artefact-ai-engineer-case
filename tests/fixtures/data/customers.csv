@@ -1,0 +1,3 @@
+customer_id,name,phone,email,city
+301,Demo Customer One,DEMO-PHONE-ONE,demo1@example.test,Demo City
+302,Demo Customer Two,DEMO-PHONE-TWO,demo2@example.test,Demo City

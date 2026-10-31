@@ -1,0 +1,3 @@
+product_id,price_brl,name,category_id,description,stock_quantity,status,specs,created_at
+101,599.90,Demo Violão Árvore,10,"Demo description, with a comma",0,active,"{""strings"":""nylon"",""color"":""Blue""}",2025-01-10
+102,799.9,Demo Keyboard Brand A,10,Demo Brand B with 88 keys,3,discontinued,"{""keys"":""61""}",2025-01-11

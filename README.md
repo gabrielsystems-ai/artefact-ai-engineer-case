@@ -4,7 +4,11 @@ This project aims to build a small Python customer-service agent for Emporio da 
 
 ## Development status
 
-Implementation is in progress. Only the Python package foundation and an import smoke test are available. The customer-service agent is not implemented yet.
+Implementation is in progress. Deterministic CSV loading and structural validation are available through `emporio_support_agent.data.load_store_data(data_dir)`. The customer-service agent is not implemented yet.
+
+The loader returns frozen records and tuple collections, preserving source money as `Decimal`, dates and independent product descriptions/specifications. It validates required columns, primary IDs and cross-table references. It accepts `products.csv`-style names or the original `desafio_tecnico_ai_eng - products.csv` naming convention for all six tables, and rejects ambiguous copies. Diagnostic row numbers count CSV records, including the header as row 1.
+
+Tests use small synthetic fixtures in `tests/fixtures/data/`. Original challenge inputs are intentionally excluded from version control. Pricing, availability and other business decisions are not implemented.
 
 ## Local setup
 
