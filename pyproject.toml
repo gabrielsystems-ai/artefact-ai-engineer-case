@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "A customer-service agent for the Emporio da Musica technical challenge."
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = ["pypdf==6.21.4"]
 
 [project.optional-dependencies]
 dev = ["pytest==9.2.0"]
