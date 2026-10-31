@@ -16,6 +16,8 @@ The loader returns frozen records and tuple collections, preserving source money
 
 Tests use small synthetic fixtures in `tests/fixtures/data/`, in-memory cases and temporary fictional PDFs generated with `pypdf`. Original challenge inputs are intentionally excluded from version control. Return eligibility and LLM integration are not implemented.
 
+`emporio_support_agent.tools` exposes five provider-independent tools through `get_tool_definitions()` and `execute_tool(context, name, arguments)`. Explicit schemas and local validation reject unexpected arguments; order identity comes only from application-owned `ToolContext`. Outputs use JSON-native values, decimal money strings and ISO dates. Product discovery matches all normalized query terms across source fields, prioritizes name/category/description/specs, and preserves source order for ties. Budgets use current unit prices from the pricing module. LLM/provider integration remains pending.
+
 ## Local setup
 
 Requires Python 3.12 or newer. The development environment uses Python 3.12.13.
