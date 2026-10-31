@@ -4,7 +4,7 @@ This project aims to build a small Python customer-service agent for Emporio da 
 
 ## Development status
 
-Implementation is in progress. Deterministic CSV loading and structural validation are available through `emporio_support_agent.data.load_store_data(data_dir)`. Exact catalog lookup/filtering, product availability, unit-price quotes, owner-scoped order lookup and policy extraction/retrieval are also implemented. A programmatic customer-service agent now integrates these tools through the OpenAI Responses API; the CLI and final conversation example files remain pending.
+Implementation is in progress. Deterministic CSV loading and structural validation are available through `emporio_support_agent.data.load_store_data(data_dir)`. Exact catalog lookup/filtering, product availability, unit-price quotes, owner-scoped order lookup and policy extraction/retrieval are also implemented. The customer-service agent integrates these tools through the OpenAI Responses API and an interactive terminal CLI. Final submission conversation example files remain pending.
 
 The loader returns frozen records and tuple collections, preserving source money as `Decimal`, dates and independent product descriptions/specifications. It validates required columns, primary IDs and cross-table references. It accepts `products.csv`-style names or the original `desafio_tecnico_ai_eng - products.csv` naming convention for all six tables, and rejects ambiguous copies. Diagnostic row numbers count CSV records, including the header as row 1.
 
@@ -37,6 +37,40 @@ uv python install 3.12
 uv venv --python 3.12 --seed .venv
 .\.venv\Scripts\python.exe -m pip install -e ".[dev]"
 ```
+
+## Run the CLI (Windows PowerShell)
+
+You need `OPENAI_API_KEY`, the six provided challenge CSV files and the provided policy PDF. Raw challenge input files are intentionally excluded from version control. The CLI accepts explicit paths to the provided CSV directory and policy PDF. `_case-input/` is only the local development layout; you can keep the supplied files elsewhere and point the flags there.
+
+Set the API key in the PowerShell session without putting its value in command history:
+
+```powershell
+$sessionApiKey = Read-Host "OpenAI API key" -AsSecureString
+$env:OPENAI_API_KEY = [System.Net.NetworkCredential]::new("", $sessionApiKey).Password
+Remove-Variable sessionApiKey
+```
+
+Replace the example source paths with your local paths:
+
+```powershell
+.\.venv\Scripts\emporio-support.exe `
+  --data-dir "C:\path\to\provided-csv-files" `
+  --policy-pdf "C:\path\to\políticas_da_loja.pdf"
+```
+
+The equivalent module entry point uses the same arguments:
+
+```powershell
+.\.venv\Scripts\python.exe -m emporio_support_agent `
+  --data-dir "C:\path\to\provided-csv-files" `
+  --policy-pdf "C:\path\to\políticas_da_loja.pdf"
+```
+
+The installed command is `emporio-support` when the virtual environment's `Scripts` directory is on `PATH`. Both entry points support `--help`. No API-key command-line argument is accepted, and `.env` files are not loaded automatically.
+
+Optionally append `--customer-id <CUSTOMER_ID>`, replacing the placeholder with a positive integer from the supplied demo data. This only simulates a session identity for order lookups; it is not authentication. Without it, product/policy conversations work and order tools report that customer context is required. The CLI does not display the identity.
+
+One agent instance handles the whole session. Enter Portuguese or English messages after `You:`; only the customer-facing answer is printed after `Agent:`. Empty input is ignored. Use `exit` or `quit` (case-insensitive), EOF or Ctrl+C to end normally with status 0. Expected source/provider/agent failures print concise errors to stderr and exit nonzero. Conversations are not saved to local files; stored Responses behavior is described above. These commands were verified on Windows PowerShell; no Unix execution is claimed.
 
 ## Tests
 
