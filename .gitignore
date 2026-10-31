@@ -1,0 +1,38 @@
+# Private case inputs and local source snapshots
+/_case-input/
+/data/raw/
+
+# Local development instructions and planning materials
+/AGENTS.md
+/COMECE-AQUI.md
+/DEVELOPMENT-PROMPT.md
+/docs/briefing/
+
+# Credentials
+.env
+.env.*
+!.env.example
+
+# Python environment, build files and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+build/
+dist/
+.cache/
+
+# Private runs and logs
+private-transcripts/
+logs/
+*.log
+
+# OS metadata
+.DS_Store
+Thumbs.db

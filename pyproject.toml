@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools==84.2.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "emporio-support-agent"
+version = "0.1.0"
+description = "A customer-service agent for the Emporio da Musica technical challenge."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest==9.2.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["emporio_support_agent*"]
+namespaces = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
