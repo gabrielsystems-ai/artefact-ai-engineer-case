@@ -14,8 +14,8 @@ What is the store's WhatsApp number?
 
 The store’s guidance lists two different WhatsApp numbers:
 
-- Company details: **(67) 3341-4444**
-- WhatsApp service section: **(67) 3321-4500**
+- **(67) 3321-4500** in the WhatsApp service section.
+- **(67) 3341-4444** in the company contact details.
 
 Please confirm with the store which number is current.
 

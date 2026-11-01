@@ -8,11 +8,11 @@ Demonstrate operational product lookup without applying an inactive promotion.
 
 **Customer**
 
-Quanto custa o Takamine GD20 e ele está disponível?
+How much is the Takamine GD20 and is it currently available?
 
 **Assistant**
 
-O **Takamine GD20 Dreadnought Natural** custa **R$ 2.199,00** e está disponível. Temos 5 unidades em estoque.
+The **Takamine GD20 Dreadnought Natural** is **R$2,199.00** and is currently available. We have 5 in stock.
 
 ## Grounding
 

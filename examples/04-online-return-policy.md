@@ -8,13 +8,13 @@ Demonstrate policy retrieval and clarification before individual return eligibil
 
 **Customer**
 
-Comprei online e quero devolver. Posso fazer a devolução?
+I bought an item online and want to return it. Can I return it?
 
 **Assistant**
 
-Para compras online, a política da loja prevê solicitar a devolução por arrependimento em até **7 dias corridos após o recebimento**. O produto deve estar sem sinais de uso, na embalagem original e com todos os acessórios e manuais. Nesse caso, o frete de devolução fica por conta da loja.
+According to the store’s policy, online purchases can be returned within **7 calendar days after receipt**, without giving a reason. The item should be unused, in its original packaging, with all accessories and manuals. The store covers return shipping for this type of return.
 
-Para eu orientar melhor: **quando você recebeu o produto?** Ele está sem sinais de uso, com a embalagem, os acessórios e os manuais? O motivo da devolução é arrependimento ou algum defeito?
+When did you actually receive the item? Is it unused, and do you still have the original packaging, accessories and manuals?
 
 ## Grounding
 

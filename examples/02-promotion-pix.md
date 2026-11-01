@@ -8,19 +8,19 @@ Demonstrate non-stacking discounts and a related follow-up in the same session.
 
 **Customer**
 
-Qual é o preço do produto 127 no PIX?
+What is the current PIX price for product 127?
 
 **Assistant**
 
-O **Kalani KAL-700T Tenor Natural (produto 127)** custa **R$ 323,10 no PIX**. O preço já inclui a promoção de 10%; não há desconto adicional para PIX.
+The current PIX price for product 127, the Kalani KAL-700T tenor ukulele, is **R$323.10**. This includes the current promotion; no additional PIX discount applies.
 
 **Customer**
 
-E o preço antes da promoção?
+And what was its list price before the promotion?
 
 **Assistant**
 
-Antes da promoção, o preço era **R$ 359,00**.
+Its list price before the promotion was **R$359.00**.
 
 ## Grounding
 

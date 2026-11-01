@@ -4,7 +4,9 @@ A Python support agent for a fictional musical-instrument store, built for the A
 
 ## Live demo
 
-The optional Streamlit interface can be run locally using the instructions below. A hosted URL will be added only after deployment and verification.
+A deployed demonstration of the optional Streamlit interface is available at [Empório da Música — live demo](https://artefact-ai-engineer-case-live-demo.streamlit.app).
+
+It uses the same `SupportAgent` as the CLI, which remains the primary minimal interface. Messages sent to the demo may make live model calls.
 
 ## Features
 
@@ -148,7 +150,7 @@ With the `ui` extra installed and the key available:
   --policy-pdf "<PATH_TO_POLICY_PDF>"
 ```
 
-The optional `--customer-id <CUSTOMER_ID>` has the same demo-only meaning as in the CLI and is not displayed. Source files must be provided separately. Any hosted evaluation demo uses a separate private deployment bundle; it is not the official public challenge repository.
+The optional `--customer-id <CUSTOMER_ID>` has the same demo-only meaning as in the CLI and is not displayed. Source files must be provided separately for local execution; original challenge data is excluded from this public repository.
 
 ## Testing
 
@@ -198,6 +200,6 @@ The repository includes the resulting implementation, automated tests and genuin
 
 ## Repository and challenge notes
 
-This is a technical-challenge prototype for a fictional store, not a production customer portal. Raw inputs, local development instructions and secrets are excluded from the official public repository. The separate private deployment bundle is optional evaluation infrastructure.
+This is a technical-challenge prototype for a fictional store, not a production customer portal. Raw inputs, local development instructions and secrets are excluded from the official public repository.
 
-Publication is not submission. The final hosted-demo URL, submission PDF and submission timestamp remain part of the later delivery freeze; no repository changes should be made after actual submission.
+Feature development is frozen. After final verification, the repository is frozen for submission. The submission PDF/form and official submission timestamp are handled separately; no repository changes should be made after actual submission.

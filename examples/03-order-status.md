@@ -8,17 +8,17 @@ Demonstrate an application-scoped order lookup with recorded tracking and an est
 
 **Customer**
 
-Qual é o status do meu pedido 8? Ele já tem código de rastreio? Qual o total registrado e a previsão de entrega?
+What is the status of my order 8? Does it have tracking information yet? What is the recorded total and estimated delivery date?
 
 **Assistant**
 
-O pedido **8 foi enviado**. Os dados registrados são:
+Your order **#8 has shipped**.
 
-- **Código de rastreio:** BRJL5544332BR
-- **Total:** R$ 349,90
-- **Previsão de entrega:** 28/02/2026
+- **Tracking code:** BRJL5544332BR
+- **Recorded total:** R$ 349.90
+- **Estimated delivery:** February 28, 2026
 
-A data é uma previsão e não confirma que o pedido foi entregue.
+The delivery date is an estimate, not confirmation that the order was received.
 
 ## Grounding
 
