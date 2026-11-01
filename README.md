@@ -72,6 +72,30 @@ Optionally append `--customer-id <CUSTOMER_ID>`, replacing the placeholder with 
 
 One agent instance handles the whole session. Enter Portuguese or English messages after `You:`; only the customer-facing answer is printed after `Agent:`. Empty input is ignored. Use `exit` or `quit` (case-insensitive), EOF or Ctrl+C to end normally with status 0. Expected source/provider/agent failures print concise errors to stderr and exit nonzero. Conversations are not saved to local files; stored Responses behavior is described above. These commands were verified on Windows PowerShell; no Unix execution is claimed.
 
+## Optional web demo
+
+The primary interface is the CLI. Streamlit is an optional thin presentation layer over the same tested `SupportAgent`; no business or authorization logic lives in the UI.
+
+Install the optional UI extra in the existing environment:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e ".[dev,ui]"
+```
+
+With `OPENAI_API_KEY` configured as described above, launch the local demo:
+
+```powershell
+.\.venv\Scripts\streamlit.exe run src/emporio_support_agent/streamlit_app.py --server.address 127.0.0.1 -- `
+  --data-dir "_case-input/originals" `
+  --policy-pdf "_case-input/originals/políticas_da_loja.pdf"
+```
+
+Raw challenge files are not included in Git. These example paths use the local development layout; replace them with your supplied CSV directory and policy PDF paths. Optional `--customer-id <CUSTOMER_ID>` has the same positive-integer, demo-only authorization meaning as in the CLI. It is not a login, and the numerical identity is not displayed. Keys remain environment-only; there is no key field or automatic `.env` loading.
+
+The active agent and display-only chat messages persist in Streamlit browser-session state. **New conversation** clears that local conversation and creates a fresh agent; it does not delete stored OpenAI Responses. Provider failures show a concise error and preserve previous messages without inventing an assistant reply. No conversations are saved to local files.
+
+Streamlit is pinned to `1.66.1` in the `ui` extra; core CLI dependencies are unchanged. AppTest covers initialization, history, reruns, reset, configuration failures and safe errors without live provider calls. UI tests skip when Streamlit is not installed. Local server startup was verified; real-browser product, multi-turn, policy and responsive checks remain pending because browser control was blocked in this verification session. This optional demo is not a production frontend or a final conversation artifact.
+
 ## Tests
 
 ```powershell
