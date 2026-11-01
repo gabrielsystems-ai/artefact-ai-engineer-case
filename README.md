@@ -1,48 +1,114 @@
-# Emporio Support Agent
+# Empório da Música — AI Customer Support Agent
 
-This project aims to build a small Python customer-service agent for Emporio da Musica, a fictional musical instrument store, using supplied store data and policies for the Artefact AI Engineer challenge.
+A Python support agent for a fictional musical-instrument store, built for the Artefact AI Engineer technical challenge. It answers Portuguese and English messages, consulting structured operational data and the supplied store-policy manual. The language model handles dialogue and tool selection; deterministic Python code handles prices, availability and order authorization.
 
-## Development status
+## Live demo
 
-Implementation is in progress. Deterministic CSV loading and structural validation are available through `emporio_support_agent.data.load_store_data(data_dir)`. Exact catalog lookup/filtering, product availability, unit-price quotes, owner-scoped order lookup and policy extraction/retrieval are also implemented. The customer-service agent integrates these tools through the OpenAI Responses API and an interactive terminal CLI. Final submission conversation example files remain pending.
+The optional Streamlit interface can be run locally using the instructions below. A hosted URL will be added only after deployment and verification.
 
-The loader returns frozen records and tuple collections, preserving source money as `Decimal`, dates and independent product descriptions/specifications. It validates required columns, primary IDs and cross-table references. It accepts `products.csv`-style names or the original `desafio_tecnico_ai_eng - products.csv` naming convention for all six tables, and rejects ambiguous copies. Diagnostic row numbers count CSV records, including the header as row 1.
+## Features
 
-`emporio_support_agent.catalog` preserves source order and requires active status plus sufficient stock for availability. `emporio_support_agent.pricing` applies one active promotion or the standard 5% PIX discount, never both. Multiple active promotions raise a conflict. Final prices use `Decimal` with cent rounding via `ROUND_HALF_UP`, preserving the source list price. Pricing and availability are checked separately.
+- Product discovery, details, stock and availability from the supplied snapshot.
+- Current unit-price quotes with active promotions and non-stacking PIX discounts.
+- Customer-bound order lookup and order history, preserving recorded totals.
+- Policy retrieval with filename, SHA-256, version, section and page provenance.
+- Portuguese/English interaction and explicit handling of conflicting sources.
+- Bounded strict function calling and in-session conversation continuity.
+- A primary interactive CLI and an optional Streamlit chat interface.
+- An offline test suite using synthetic fixtures and a fake provider client.
 
-`emporio_support_agent.orders` returns only orders belonging to the application-supplied demo customer ID, without customer identity/contact fields. This session identity is not production authentication. Missing and inaccessible orders both return `None`. Order views preserve historical totals, statuses, notes and missing tracking; `estimated_delivery` remains an estimate, not an actual receipt date.
+The prototype is read-only: it does not purchase instruments, approve refunds, cancel orders or contact carriers.
 
-`emporio_support_agent.policies` extracts text PDFs page by page with `pypdf`, detects version and numbered sections, and preserves filename/SHA-256/page provenance. Complete parent sections include their subsections; subsections are also searchable. Lexical ranking counts distinct matched terms, adds twice the title matches, and breaks ties by source order. Case, accents and punctuation are normalized; common PT/EN stop words are ignored. Contradictory source statements remain unchanged. The parser targets left-aligned numbered headings and indented lists, without OCR or semantic search.
+## Architecture
 
-Tests use small synthetic fixtures in `tests/fixtures/data/`, in-memory cases and temporary fictional PDFs generated with `pypdf`. Original challenge inputs are intentionally excluded from version control. An automated return-approval engine is not implemented.
-
-`emporio_support_agent.tools` exposes five provider-independent tools through `get_tool_definitions()` and `execute_tool(context, name, arguments)`. Explicit schemas and local validation reject unexpected arguments; order identity comes only from application-owned `ToolContext`. Outputs use JSON-native values, decimal money strings and ISO dates. Product discovery matches all normalized query terms across source fields, prioritizes name/category/description/specs, and preserves source order for ties. Budgets use current unit prices from the pricing module.
-
-`emporio_support_agent.agent.SupportAgent(context=...)` provides `respond(message)`, returning an immutable `AgentReply` with customer-facing text and tool-name/count metadata. The default model is `gpt-6.1-terra`, tested live with `openai==3.42.0` on Python 3.12.13. Product prices/availability, promotion plus PIX, owner-scoped orders, return-policy clarification, English opening hours and conflicting contact sources were checked through real model/tool exchanges. These verification runs are not final challenge examples.
-
-`emporio_support_agent.openai_adapter` converts the five internal schemas to strict function tools: all provider properties are required, internally optional properties permit null (including enum values), and optional null arguments are omitted before internal validation. Deterministic tools remain authoritative. Each request resends the store instructions and approved tools, disables parallel calls, and uses matching `call_id` values for tool outputs. Each customer turn allows at most four tool rounds and eight executions by default, with a 1,024-token response cap. The default client has a 45-second timeout and no automatic retries. Provider failures raise safe project errors, and failed turns retain the last completed session state.
-
-Local conversation state consists only of the last completed response ID in memory, chained with `previous_response_id`. Requests use `store=True`, so conversation content is stored at OpenAI: this is a prototype tradeoff, not local-only content storage. There is no local disk/database history or cross-process recovery. Use one agent instance sequentially per demo customer context. The runtime uses preloaded snapshots, not a live ERP or carrier integration.
-
-Supply the API key through `OPENAI_API_KEY` in the local process environment and never commit it; `.env` files are not loaded automatically. Normal pytest execution is offline and uses a fake Responses client with real deterministic tools. Real provider checks run separately.
-
-## Local setup
-
-Requires Python 3.12 or newer. The development environment uses Python 3.12.13.
-
-From the project root, run these commands in PowerShell with `uv` installed:
-
-```powershell
-uv python install 3.12
-uv venv --python 3.12 --seed .venv
-.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
+```mermaid
+flowchart TD
+    Customer --> UI["CLI / optional Streamlit"]
+    UI --> Agent["SupportAgent: bounded tool loop"]
+    Agent <--> OpenAI["OpenAI Responses API"]
+    Agent --> Tools["Strict-schema adapter and allowlisted tools"]
+    Tools --> Domain["Deterministic Python domain logic"]
+    Domain --> Sources["CSV snapshot / policy corpus"]
 ```
 
-## Run the CLI (Windows PowerShell)
+The model decides when to use a tool; deterministic application code remains authoritative for operational facts, authorization and pricing. The model does not receive direct file access or the customer directory.
 
-You need `OPENAI_API_KEY`, the six provided challenge CSV files and the provided policy PDF. Raw challenge input files are intentionally excluded from version control. The CLI accepts explicit paths to the provided CSV directory and policy PDF. `_case-input/` is only the local development layout; you can keep the supplied files elsewhere and point the flags there.
+## Why this architecture
 
-Set the API key in the PowerShell session without putting its value in command history:
+Separating language generation from domain rules reduces invented operational facts and makes the rules independently testable. Application-owned identity stays outside model-controlled order arguments. One small agent and a section retriever are sufficient for the supplied data; a database, agent framework and vector service would add infrastructure without helping demonstrate this case. Both interfaces remain thin orchestration layers.
+
+## Model and provider
+
+- **Provider:** OpenAI.
+- **API:** Responses API, using `openai==3.42.0`.
+- **Default verified model:** `gpt-6.1-terra`.
+
+Live checks verified text responses, strict function calls, call IDs and nullable optional arguments. The five examples below were captured in new real model-backed runs. No model-comparison benchmark is claimed, and there is no automatic fallback. The programmatic agent accepts a model override for testing/configuration; the CLI and UI use its default.
+
+## Tool design
+
+| Tool | Responsibility |
+| --- | --- |
+| `search_products` | Search source fields and filter by category, current unit-price budget or availability. |
+| `get_product_details` | Return original product fields, current price and availability. |
+| `get_order_status` | Return one order belonging to the application-supplied demo customer. |
+| `list_my_orders` | Return that customer's historical orders, including cancelled orders. |
+| `search_store_policies` | Retrieve complete relevant policy sections with provenance. |
+
+Internal schemas allow optional arguments to be omitted. The OpenAI adapter marks every provider property required and makes internally optional properties nullable, including enums. It removes optional nulls before the existing local validator runs. Unknown tools and unexpected arguments are rejected.
+
+The loop disables parallel tool calls and allows at most four tool rounds and eight executions per customer turn by default. Requests have a 1,024-token output cap. The default client has a 45-second timeout and no automatic retries. Expected provider failures produce safe project exceptions.
+
+## Data and privacy
+
+The challenge-provided raw files are intentionally not committed to the public repository.
+
+Supply a directory containing the six CSV datasets: `categories`, `products`, `promotions`, `customers`, `orders` and `order_items`. The loader accepts either `products.csv`-style names or the original `desafio_tecnico_ai_eng - products.csv` naming convention. Missing, ambiguous or structurally invalid sources fail explicitly.
+
+The loader validates columns, identifiers and references and preserves money as `Decimal`, dates as dates, and source descriptions/specifications. Availability requires active status and enough stock. Pricing applies one active promotion or the standard 5% PIX discount, never both, using cent rounding with `ROUND_HALF_UP`. Ambiguous active promotions produce a controlled error.
+
+Customer identity is application/session context. `customer_id` is never a model-controlled tool argument. The CLI's optional identity flag only simulates a known customer; it is not authentication. Missing and unauthorized orders deliberately produce the same public not-found result. Model-facing order views exclude customer identity/contact fields and preserve historical totals, tracking and estimates.
+
+Public test data is synthetic. The example transcripts were privacy-reviewed and contain no customer identity or contact data; store contact numbers are allowed policy content. Operational data remains a preloaded local snapshot, not a live ERP or carrier feed.
+
+## Policy retrieval
+
+The PDF loader preserves pages, numbered sections and source provenance. Parent sections include their subsections, so rules remain together. Retrieval normalizes case, accents and punctuation, ranks distinct lexical term matches with extra title weight, and preserves source order for ties.
+
+There is no embedding service or vector database. Source contradictions remain intact rather than being silently corrected. The conflicting WhatsApp numbers are an intentional uncertainty-handling example. Product name, description and specification conflicts are also preserved. Return guidance asks for missing facts rather than approving an individual request.
+
+## Conversation state
+
+The agent keeps the last completed response ID in memory and chains requests with `previous_response_id`. Stable instructions and approved tools are sent on every request. Failed turns do not replace the last completed session state.
+
+There is no application database or local transcript persistence. Responses use `store=True`, so conversation content is stored by OpenAI: this is a prototype trade-off, not a claim of local-only storage. Streamlit additionally keeps display-only messages in browser-session state. **New conversation** resets the local demo session; it does not delete provider-side Responses.
+
+## Interfaces
+
+**CLI is the primary interface.** It supports multiple customer turns, ignores blank messages, and exits normally on `exit`, `quit`, EOF or Ctrl+C. Normal output contains only customer-facing answers.
+
+**Streamlit is optional.** It uses the same `SupportAgent`, native chat elements, one agent per active browser conversation, a loading indicator and a new-conversation control. No business or authorization logic lives in the UI.
+
+## Installation
+
+Requires Python 3.12 or newer. The verified Windows environment uses Python 3.12.13. From the repository root in PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -e ".[dev,ui]"
+```
+
+For the CLI without Streamlit, install `".[dev]"` instead. The `ui` extra pins `streamlit==1.66.1`; core runtime dependencies are `openai==3.42.0` and `pypdf==6.21.4`. The development extra pins `pytest==9.2.0`. Unix commands are not presented as verified.
+
+## Environment configuration
+
+Live model execution requires an OpenAI API key, model access and available API quota. Offline tests require none of these.
+
+```powershell
+$env:OPENAI_API_KEY = "<YOUR_OPENAI_API_KEY>"
+```
+
+Never commit the key. To avoid placing its value in shell history, use a masked prompt instead:
 
 ```powershell
 $sessionApiKey = Read-Host "OpenAI API key" -AsSecureString
@@ -50,54 +116,88 @@ $env:OPENAI_API_KEY = [System.Net.NetworkCredential]::new("", $sessionApiKey).Pa
 Remove-Variable sessionApiKey
 ```
 
-Replace the example source paths with your local paths:
+The application reads the process environment, accepts no API-key CLI argument and does not automatically load `.env` files.
+
+## Running the CLI
+
+Replace the placeholders with the paths where you stored the provided challenge files:
 
 ```powershell
 .\.venv\Scripts\emporio-support.exe `
-  --data-dir "C:\path\to\provided-csv-files" `
-  --policy-pdf "C:\path\to\políticas_da_loja.pdf"
+  --data-dir "<PATH_TO_CSV_DIRECTORY>" `
+  --policy-pdf "<PATH_TO_POLICY_PDF>"
 ```
 
-The equivalent module entry point uses the same arguments:
+Equivalent module entry point:
 
 ```powershell
 .\.venv\Scripts\python.exe -m emporio_support_agent `
-  --data-dir "C:\path\to\provided-csv-files" `
-  --policy-pdf "C:\path\to\políticas_da_loja.pdf"
+  --data-dir "<PATH_TO_CSV_DIRECTORY>" `
+  --policy-pdf "<PATH_TO_POLICY_PDF>"
 ```
 
-The installed command is `emporio-support` when the virtual environment's `Scripts` directory is on `PATH`. Both entry points support `--help`. No API-key command-line argument is accepted, and `.env` files are not loaded automatically.
+The installed command is `emporio-support` when the environment's `Scripts` directory is on `PATH`. Both entry points support `--help`. Optionally append `--customer-id <CUSTOMER_ID>` with a positive demo identity for order queries. Without it, product/policy questions work and order tools report that customer context is required.
 
-Optionally append `--customer-id <CUSTOMER_ID>`, replacing the placeholder with a positive integer from the supplied demo data. This only simulates a session identity for order lookups; it is not authentication. Without it, product/policy conversations work and order tools report that customer context is required. The CLI does not display the identity.
+## Running the optional Streamlit UI
 
-One agent instance handles the whole session. Enter Portuguese or English messages after `You:`; only the customer-facing answer is printed after `Agent:`. Empty input is ignored. Use `exit` or `quit` (case-insensitive), EOF or Ctrl+C to end normally with status 0. Expected source/provider/agent failures print concise errors to stderr and exit nonzero. Conversations are not saved to local files; stored Responses behavior is described above. These commands were verified on Windows PowerShell; no Unix execution is claimed.
-
-## Optional web demo
-
-The primary interface is the CLI. Streamlit is an optional thin presentation layer over the same tested `SupportAgent`; no business or authorization logic lives in the UI.
-
-Install the optional UI extra in the existing environment:
-
-```powershell
-.\.venv\Scripts\python.exe -m pip install -e ".[dev,ui]"
-```
-
-With `OPENAI_API_KEY` configured as described above, launch the local demo:
+With the `ui` extra installed and the key available:
 
 ```powershell
 .\.venv\Scripts\streamlit.exe run src/emporio_support_agent/streamlit_app.py --server.address 127.0.0.1 -- `
-  --data-dir "_case-input/originals" `
-  --policy-pdf "_case-input/originals/políticas_da_loja.pdf"
+  --data-dir "<PATH_TO_CSV_DIRECTORY>" `
+  --policy-pdf "<PATH_TO_POLICY_PDF>"
 ```
 
-Raw challenge files are not included in Git. These example paths use the local development layout; replace them with your supplied CSV directory and policy PDF paths. Optional `--customer-id <CUSTOMER_ID>` has the same positive-integer, demo-only authorization meaning as in the CLI. It is not a login, and the numerical identity is not displayed. Keys remain environment-only; there is no key field or automatic `.env` loading.
+The optional `--customer-id <CUSTOMER_ID>` has the same demo-only meaning as in the CLI and is not displayed. Source files must be provided separately. Any hosted evaluation demo uses a separate private deployment bundle; it is not the official public challenge repository.
 
-The active agent and display-only chat messages persist in Streamlit browser-session state. **New conversation** clears that local conversation and creates a fresh agent; it does not delete stored OpenAI Responses. Provider failures show a concise error and preserve previous messages without inventing an assistant reply. No conversations are saved to local files.
-
-Streamlit is pinned to `1.66.1` in the `ui` extra; core CLI dependencies are unchanged. AppTest covers initialization, history, reruns, reset, configuration failures and safe errors without live provider calls. UI tests skip when Streamlit is not installed. Local server startup was verified; real-browser product, multi-turn, policy and responsive checks remain pending because browser control was blocked in this verification session. This optional demo is not a production frontend or a final conversation artifact.
-
-## Tests
+## Testing
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe -m pip check
 ```
+
+The final suite contains **425 passing tests**. Normal pytest execution performs zero external network calls. Provider behavior is scripted in tests; deterministic domain tools remain real. Streamlit AppTest covers reruns, history, reset, configuration, safe errors and display privacy. UI tests skip when the optional dependency is absent.
+
+Live provider checks are separate from pytest. Passing offline tests does not establish API access or model answer quality.
+
+## Conversation examples
+
+These are exact conversations captured from new live `gpt-6.1-terra` runs, rather than fabricated transcripts. Grounding notes identify the tools used without exposing provider IDs or customer identity.
+
+1. [Product price and availability](examples/01-product-availability.md)
+2. [Promotion, PIX and a related follow-up](examples/02-promotion-pix.md)
+3. [Customer-bound order status](examples/03-order-status.md)
+4. [Online return-policy clarification](examples/04-online-return-policy.md)
+5. [Conflicting contact information in English](examples/05-conflicting-contact-policy.md)
+
+## Technical decisions and trade-offs
+
+- **CLI first:** the challenge did not require a frontend; the CLI kept the primary interface small.
+- **Optional Streamlit:** a presentation layer added without changing the domain or agent.
+- **Deterministic tools:** pricing, availability and authorization are independently testable Python rules.
+- **Lexical retrieval:** complete sections suit the small manual, with less infrastructure than vector search.
+- **In-session history:** sufficient for this prototype, with no database to operate.
+- **Provider adapter:** OpenAI strict-schema requirements stay separate from internal tool contracts.
+
+## Known limitations
+
+Identity is simulated, not authenticated. Local session state is not durable. Retrieval is lexical, with no semantic-search evaluation. There is no human-agent handoff, transaction execution, production observability, provider fallback, production rate limiting or deployment/security hardening. Model behavior is probabilistic despite grounding instructions, and provider-side Responses are stored during prototype sessions.
+
+The public repository intentionally excludes original challenge inputs, so a reviewer needs the provided source files to run operational conversations. Policy extraction targets the supplied text-PDF layout; it is not a general OCR solution. Historical snapshots and contradictory source fields do not establish current real-world facts.
+
+## What I would improve with more time
+
+Real authentication, durable session management, structured observability and evaluations, human handoff, explicit customer-facing policy citations, a larger adversarial test set, configurable provider routing, and production rate limiting/abuse controls.
+
+## AI coding-assistant disclosure
+
+I used OpenAI ChatGPT and Codex as development assistants during this challenge for requirements decomposition, implementation planning, code/test drafting, documentation review and iterative code review.
+
+The repository includes the resulting implementation, automated tests and genuine incremental commits. Verification included offline tests, separate live provider/tool-calling runs and CLI checks; the optional UI also has automated AppTest coverage. The conversation artifacts were captured from actual live runs and checked for grounding and privacy. AI assistance is disclosed rather than presenting the work as unaided or every line as independently handwritten.
+
+## Repository and challenge notes
+
+This is a technical-challenge prototype for a fictional store, not a production customer portal. Raw inputs, local development instructions and secrets are excluded from the official public repository. The separate private deployment bundle is optional evaluation infrastructure.
+
+Publication is not submission. The final hosted-demo URL, submission PDF and submission timestamp remain part of the later delivery freeze; no repository changes should be made after actual submission.
